@@ -288,7 +288,7 @@
             envelopeContainer.classList.toggle('open');
         });
 
-        // 2. REAL Stardew Fishing Minigame Logic
+        // 2. REAL Stardew Fishing Minigame Logic (Training Rod Edition)
         const castBtn = document.getElementById('cast-btn');
         const gameUI = document.getElementById('game-ui');
         const actionBtn = document.getElementById('reel-action-btn');
@@ -319,11 +319,11 @@
 
             // --- Catch Bar Physics ---
             if (isHolding) {
-                barVelocity += 0.6; // Upward thrust when holding
+                barVelocity += 0.35; // SLOWER: Upward thrust
             } else {
-                barVelocity -= 0.6; // Gravity when released
+                barVelocity -= 0.35; // SLOWER: Gravity
             }
-            barVelocity *= 0.85;    // Friction/Damping to smooth it out
+            barVelocity *= 0.82;    // SLOWER: More friction so it doesn't bounce wildly
             barPos += barVelocity;
 
             // Keep bar within bounds (0% to 70%)
@@ -331,12 +331,12 @@
             if (barPos > 70) { barPos = 70; barVelocity = 0; }
 
             // --- Fish AI ---
-            // The fish randomly decides to swim to a new depth
-            if (Math.random() < 0.03) {
+            // The fish randomly decides to swim to a new depth (less frequently now)
+            if (Math.random() < 0.02) {
                 fishTarget = Math.random() * 85; 
             }
             // Smoothly move fish towards its target
-            fishPos += (fishTarget - fishPos) * 0.05;
+            fishPos += (fishTarget - fishPos) * 0.02; // SLOWER: Fish travel speed
 
             // Keep fish within bounds
             if (fishPos < 0) fishPos = 0;
@@ -357,7 +357,7 @@
                 progressFill.style.backgroundColor = '#22c55e'; // Green progress
                 catchBar.style.backgroundColor = 'rgba(74, 222, 128, 0.8)'; // Green bar
             } else {
-                progress -= 0.25; // Drain meter
+                progress -= 0.15; // MORE FORGIVING: Drain meter slower
                 progressFill.style.backgroundColor = '#ef4444'; // Red progress
                 catchBar.style.backgroundColor = 'rgba(248, 113, 113, 0.8)'; // Red bar
             }
