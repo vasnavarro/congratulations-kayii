@@ -150,18 +150,19 @@
         <div class="h-[28rem] block md:hidden"></div>
     </section>
 
-    <!-- 3. It Takes Two: Co-op Section -->
+    <!-- 3. Player 1 & Player 2: Portrait Section -->
     <section class="py-16 px-6 max-w-4xl mx-auto text-center mt-12 md:mt-0 relative z-10">
         <h3 class="font-heading text-3xl font-semibold mb-4 text-pastel-dark tracking-wide">Player 1 & Player 2</h3>
         <p class="text-slate-500 mb-8 max-w-lg mx-auto">Like May and Cody (but with way less arguing and definitely no Book of Love), we make the ultimate co-op team.</p>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
             
-            <!-- Player 1 Card (Standard Video Player) -->
+            <!-- Player 1 Card (Your Picture) -->
             <div class="bg-white rounded-3xl shadow-lg border-2 border-blue-100 overflow-hidden transform transition hover:-translate-y-2 flex flex-col">
-                <!-- Video Container -->
-                <div class="w-full aspect-video bg-slate-200 relative">
-                    <video src="boss-fight.mp4" controls class="w-full h-full object-cover" poster="https://via.placeholder.com/640x360?text=Hit+Play!"></video>
+                <!-- Image Container - Aspect Square for better portrait fit -->
+                <div class="w-full aspect-square bg-slate-200 relative">
+                    <!-- REPLACE 'kero-pic.jpg' WITH YOUR ACTUAL UPLOADED PICTURE -->
+                    <img src="kero-pic.jpg" alt="Kero" class="w-full h-full object-cover">
                 </div>
                 <div class="p-6 flex-grow">
                     <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 text-xl shadow-inner">🎮</div>
@@ -170,11 +171,12 @@
                 </div>
             </div>
             
-            <!-- Player 2 Card (Image from GitHub) -->
+            <!-- Player 2 Card (Her Picture) -->
             <div class="bg-white rounded-3xl shadow-lg border-2 border-blue-100 overflow-hidden transform transition hover:-translate-y-2 flex flex-col">
-                <!-- Image Container -->
-                <div class="w-full aspect-video bg-slate-200 relative">
-                    <img src="stardew-fishing.png" alt="Stardew Valley Fishing" class="w-full h-full object-cover">
+                <!-- Image Container - Aspect Square for better portrait fit -->
+                <div class="w-full aspect-square bg-slate-200 relative">
+                    <!-- REPLACE 'kayii-pic.jpg' WITH HER ACTUAL UPLOADED PICTURE -->
+                    <img src="kayii-pic.jpg" alt="Kayii" class="w-full h-full object-cover">
                 </div>
                 <div class="p-6 flex-grow">
                     <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3 text-xl shadow-inner">🎓</div>
@@ -186,24 +188,31 @@
         </div>
     </section>
 
-    <!-- 4. Anime & Movies Watchlist -->
+    <!-- 4. Our Memories (Video & Games Watchlist) -->
     <section class="py-16 px-6 max-w-5xl mx-auto text-center bg-blue-50/50 rounded-3xl my-8">
-        <h3 class="font-heading text-3xl font-semibold mb-2 text-pastel-dark">Our Watchlist</h3>
-        <p class="text-slate-500 mb-8">From epic anime arcs to our favorite movie nights.</p>
+        <h3 class="font-heading text-3xl font-semibold mb-2 text-pastel-dark">Our Memories</h3>
+        <p class="text-slate-500 mb-8">From epic boss fights to our favorite gaming and movie nights.</p>
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Image Placeholders (Replace the src with your actual image URLs later!) -->
-            <div class="aspect-[3/4] bg-slate-200 rounded-xl overflow-hidden shadow-md relative group">
-                <img src="https://via.placeholder.com/300x400?text=Upload+Anime+Pic" alt="Memory" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+            
+            <!-- Memory 1: It Takes Two Video -->
+            <div class="aspect-[3/4] bg-slate-900 rounded-xl overflow-hidden shadow-md relative group flex items-center justify-center">
+                <video src="boss-fight.mp4" controls class="w-full object-contain" poster="https://via.placeholder.com/300x400/1e293b/ffffff?text=Hit+Play!"></video>
             </div>
+            
+            <!-- Memory 2: Stardew Valley Fishing -->
             <div class="aspect-[3/4] bg-slate-200 rounded-xl overflow-hidden shadow-md relative group">
-                <img src="https://via.placeholder.com/300x400?text=Upload+Movie+Pic" alt="Memory" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                <img src="stardew-fishing.png" alt="Stardew Valley" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
             </div>
+
+            <!-- Memory 3: Placeholder (Replace later!) -->
             <div class="aspect-[3/4] bg-slate-200 rounded-xl overflow-hidden shadow-md relative group">
-                <img src="https://via.placeholder.com/300x400?text=Upload+Anime+Pic" alt="Memory" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                <img src="https://via.placeholder.com/300x400?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
             </div>
+
+            <!-- Memory 4: Placeholder (Replace later!) -->
             <div class="aspect-[3/4] bg-slate-200 rounded-xl overflow-hidden shadow-md relative group">
-                <img src="https://via.placeholder.com/300x400?text=Upload+Movie+Pic" alt="Memory" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                <img src="https://via.placeholder.com/300x400?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
             </div>
         </div>
     </section>
