@@ -59,7 +59,7 @@
             background-position: 0% 100%; /* Side Idle row */
             background-repeat: no-repeat;
             image-rendering: pixelated;
-            transform: scaleX(-1); /* Flips him to face left initially */
+            transform: scaleX(1); /* Now facing right towards Kayii */
             transition: transform 0.1s;
         }
 
@@ -124,15 +124,14 @@
                     <p class="text-xs text-slate-400 text-right mt-2 animate-pulse font-bold">Tap here to continue ▼</p>
                 </div>
 
-                <!-- THE NPC/FOLLOWER: Kero -->
-                <!-- We use left and top percentages so he scales properly before JS takes over -->
-                <div id="kero-npc" class="absolute w-20 h-20 md:w-28 md:h-28 z-10" style="left: 55%; top: 40%;">
+                <!-- THE NPC/FOLLOWER: Kero (Moved to left side) -->
+                <div id="kero-npc" class="absolute w-20 h-20 md:w-28 md:h-28 z-10" style="left: 15%; top: 50%;">
                     <div class="absolute bottom-1 left-1/4 w-1/2 h-2 bg-black/20 rounded-full blur-[2px]"></div>
                     <div id="kero-sprite" class="absolute inset-0"></div>
                 </div>
 
-                <!-- THE PLAYER: Kayii -->
-                <div id="rpg-player" class="absolute w-20 h-20 md:w-28 md:h-28 z-20" style="left: 20px; top: 100px;">
+                <!-- THE PLAYER: Kayii (Starts more towards middle so they aren't on top of each other) -->
+                <div id="rpg-player" class="absolute w-20 h-20 md:w-28 md:h-28 z-20" style="left: 35%; top: 45%;">
                     <div class="absolute bottom-1 left-1/4 w-1/2 h-2 bg-black/20 rounded-full blur-[2px]"></div>
                     <div id="player-sprite" class="absolute inset-0"></div>
                 </div>
@@ -334,7 +333,8 @@
 
         // --- MOVEMENT ENGINE ---
         let rpgActive = true;
-        let pX = 20; let pY = 100; const speed = 3.5;
+        let pX = 35; let pY = 45; // Start values (will be updated immediately on first frame)
+        const speed = 3.5;
         const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
 
         window.addEventListener('keydown', (e) => { if(rpgActive && keys.hasOwnProperty(e.key)) keys[e.key] = true; });
@@ -355,8 +355,9 @@
         let frameCount = 0; let animIndex = 0; let currentFacing = 0; 
         
         // Kero (Follower) Animation Vars
-        let kX = -1; let kY = -1; // Will initialize on first loop
-        let kFrameCount = 0; let kAnimIndex = 0; let kFacing = 0; let kScale = -1;
+        let kX = -1; let kY = -1; 
+        let kFrameCount = 0; let kAnimIndex = 0; let kFacing = 0; let kScale = 1;
+        let pXInit = false; // Flag for fixing starting positions
         
         // State Machine
         let currentAction = "none"; // "none", "talk", "fish"
@@ -364,8 +365,9 @@
         function rpgLoop() {
             if (!rpgActive && !dialogueActive) return;
 
-            // Initialize Kero's position based on CSS on the very first frame
+            // Initialize correct positions based on CSS on the very first frame
             if (kX === -1) { kX = keroNpc.offsetLeft; kY = keroNpc.offsetTop; }
+            if (!pXInit) { pX = rpgPlayer.offsetLeft; pY = rpgPlayer.offsetTop; pXInit = true; }
 
             if (rpgActive) {
                 // 1. PLAYER MOVEMENT
@@ -379,13 +381,23 @@
 
                 pX += moveX; pY += moveY;
 
+                // THE INVISIBLE WALL CALCULATION (Blocks her from water)
                 const mapW = rpgContainer.clientWidth; const mapH = rpgContainer.clientHeight;
                 const pW = rpgPlayer.clientWidth; const pH = rpgPlayer.clientHeight;
-                if (pX < 0) pX = 0; if (pX > mapW - pW) pX = mapW - pW;
-                if (pY < 0) pY = 0; if (pY > mapH - pH) pY = mapH - pH;
+                
+                // The edge where the grass ends and water begins (2/3 of map width)
+                // We subtract a little bit extra (pW * 0.6) so she stands "on the shore" and doesn't overlap the water
+                const maxRightX = mapW * (2/3) - (pW * 0.6); 
+
+                // Apply boundaries
+                if (pX < 0) pX = 0; 
+                if (pX > maxRightX) pX = maxRightX; // Invisible wall logic applied!
+                if (pY < 0) pY = 0; 
+                if (pY > mapH - pH) pY = mapH - pH;
 
                 rpgPlayer.style.left = pX + 'px'; rpgPlayer.style.top = pY + 'px';
 
+                // Player Animation
                 if (isMoving) {
                     frameCount++;
                     if (frameCount > 8) { animIndex++; if (animIndex > 3) animIndex = 1; frameCount = 0; }
@@ -397,33 +409,28 @@
                 // 2. KERO POKEMON FOLLOWER AI
                 if (hasTalkedToKero) {
                     let kIsMoving = false;
-                    
-                    // Calculate distance to Kayii
                     let dx = pX - kX;
                     let dy = pY - kY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
                     
-                    // If Kayii is further than ~65 pixels, Kero walks towards her
                     if (dist > 65) {
                         kIsMoving = true;
                         let angle = Math.atan2(dy, dx);
                         kX += Math.cos(angle) * speed;
                         kY += Math.sin(angle) * speed;
                         
-                        // Update Kero's facing direction based on movement angle
                         if (Math.abs(dx) > Math.abs(dy)) {
-                            if (dx > 0) { kFacing = 100; kScale = 1; } // Right
-                            else { kFacing = 100; kScale = -1; } // Left
+                            if (dx > 0) { kFacing = 100; kScale = 1; } 
+                            else { kFacing = 100; kScale = -1; } 
                         } else {
-                            if (dy > 0) { kFacing = 0; kScale = 1; } // Down
-                            else { kFacing = 50; kScale = 1; } // Up
+                            if (dy > 0) { kFacing = 0; kScale = 1; } 
+                            else { kFacing = 50; kScale = 1; } 
                         }
                     }
                     
                     keroNpc.style.left = kX + 'px';
                     keroNpc.style.top = kY + 'px';
                     
-                    // Kero Animation cycle
                     if (kIsMoving) {
                         kFrameCount++;
                         if (kFrameCount > 8) { kAnimIndex++; if (kAnimIndex > 3) kAnimIndex = 1; kFrameCount = 0; }
@@ -436,8 +443,9 @@
 
                 // 3. UI CONTEXT CHECKS
                 const isNearKero = (pX < kX + pW + 20 && pX + pW > kX - 20 && pY < kY + pH + 20 && pY + pH > kY - 20);
-                const waterEdge = mapW - (mapW / 3) - (pW / 2);
-                const isNearWater = (pX > waterEdge);
+                
+                // The new Fishing Check: If she is touching the invisible wall, she can fish!
+                const isNearWater = (pX >= maxRightX - 5); 
 
                 if (isNearKero && !hasTalkedToKero) {
                     currentAction = "talk";
@@ -478,7 +486,6 @@
 
             if (currentAction === "talk") {
                 if (!dialogueActive) {
-                    // Start dialogue
                     rpgActive = false; 
                     dialogueActive = true;
                     dialogueIndex = 0;
@@ -486,16 +493,14 @@
                     dialogueBox.classList.remove('hidden');
                     dialogueText.innerText = dialogueLines[dialogueIndex];
                 } else {
-                    // Next line
                     dialogueIndex++;
                     if (dialogueIndex < dialogueLines.length) {
                         dialogueText.innerText = dialogueLines[dialogueIndex];
                     } else {
-                        // End Dialogue -> THE COLOR BLOOMS!
                         dialogueActive = false;
                         hasTalkedToKero = true;
                         dialogueBox.classList.add('hidden');
-                        rpgActive = true; // Unfreeze game
+                        rpgActive = true; 
                         
                         document.getElementById('main-body').classList.remove('bw-theme');
                         instructions.innerText = "Go cast your line at the pond!";
@@ -581,7 +586,10 @@
         window.resetToRPG = function() {
             resultFail.classList.add('hidden'); resultFail.classList.remove('flex');
             rpgContainer.classList.remove('hidden'); rpgControls.classList.remove('hidden'); instructions.classList.remove('hidden');
-            pX = rpgContainer.clientWidth - (rpgContainer.clientWidth / 3) - 60; // Spawn near water but safe
+            
+            // Spawn her near the invisible wall safely!
+            const pW = rpgPlayer.clientWidth;
+            pX = rpgContainer.clientWidth * (2/3) - (pW * 0.6) - 10; 
             rpgActive = true; 
             requestAnimationFrame(rpgLoop);
         }
