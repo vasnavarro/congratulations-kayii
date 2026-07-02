@@ -58,17 +58,8 @@
         }
 
         /* --- FISHING BACKGROUNDS --- */
-        .bg-fishing {
-            background-image: url('fishing.png');
-            background-size: cover;
-            background-position: center;
-        }
-        
-        .bg-caught {
-            background-image: url('caughtfish.png');
-            background-size: cover;
-            background-position: center;
-        }
+        .bg-fishing { background-image: url('fishing.png'); background-size: cover; background-position: center; }
+        .bg-caught { background-image: url('caughtfish.png'); background-size: cover; background-position: center; }
 
         /* --- THE FLOWER BOMBARDMENT BACKGROUNDS --- */
         @keyframes pan-bg { 0% { background-position: 0px 0px; } 100% { background-position: 300px 300px; } }
@@ -87,11 +78,41 @@
             animation: pan-bg-reverse 35s linear infinite;
         }
 
-        /* --- Mobile Perfected Interactive Letter --- */
+        /* --- TOUCH DEVICE RESPONSIVENESS --- */
+        .touch-only { display: none !important; }
+        .mouse-only { display: flex !important; }
+        
+        /* If the device has a touchscreen, show the D-pad and mobile action buttons */
+        @media (pointer: coarse) {
+            .touch-only { display: flex !important; }
+            .mouse-only { display: none !important; }
+        }
+
+        /* --- THE PORTRAIT BLOCKER --- */
+        #portrait-warning { display: none; }
+        @media screen and (orientation: portrait) and (max-width: 1024px) {
+            #main-content-wrapper { display: none !important; }
+            #portrait-warning { display: flex !important; }
+        }
+
+        /* --- MOBILE-PERFECT ENVELOPE --- */
         .envelope-flap { transform-origin: top; transition: transform 0.6s ease-in-out; }
         .envelope-container.open .envelope-flap { transform: rotateX(180deg); z-index: 0; }
-        .letter-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.8s ease-in-out, opacity 0.5s ease, transform 0.8s ease-in-out; opacity: 0; transform: translateY(0); }
-        .envelope-container.open .letter-content { grid-template-rows: 1fr; opacity: 1; transform: translateY(150px); }
+        
+        /* Using Max-Height instead of Grid so mobile phones don't break */
+        .letter-content { 
+            max-height: 0px; 
+            overflow: hidden;
+            transition: max-height 0.8s ease-in-out, opacity 0.5s ease, transform 0.8s ease-in-out; 
+            opacity: 0; 
+            transform: translateY(0); 
+        }
+        .envelope-container.open .letter-content { 
+            max-height: 500px; /* Gives it enough room to slide out */
+            opacity: 1; 
+            transform: translateY(150px); 
+        }
+        
         .letter-inner { overflow: hidden; }
         .no-select { user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
         
@@ -101,237 +122,223 @@
 </head>
 <body class="font-body text-slate-700 overflow-x-hidden bw-theme" id="main-body">
 
-    <!-- 1. The Gatekeeper: RPG & Fishing Minigame -->
-    <section id="gatekeeper-section" class="min-h-screen flex flex-col items-center justify-center px-4 relative z-20 transition-opacity duration-1000">
-        <h1 class="font-heading text-4xl md:text-5xl font-bold text-pastel-dark mb-2 text-center mt-6">Unlock Your Gift</h1>
-        <p id="game-instructions" class="text-slate-500 mb-6 text-center text-sm md:text-base max-w-sm">Use the D-Pad or Arrow Keys. Go talk to Kero!</p>
-
-        <div class="bg-blue-50 rounded-3xl p-4 md:p-8 border-4 border-blue-200 shadow-xl relative w-full max-w-4xl flex flex-col items-center justify-center mb-6">
-            
-            <!-- THE RPG OVERWORLD MAP -->
-            <div id="rpg-container" class="relative w-full h-72 md:h-[480px] bg-green-300 rounded-xl overflow-hidden border-4 border-green-500 shadow-inner flex flex-col transition-all duration-300">
-                <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#166534 2px, transparent 2px); background-size: 20px 20px;"></div>
-                
-                <div id="water-zone" class="absolute right-0 top-0 w-1/3 h-full bg-blue-400 border-l-4 border-blue-300 flex items-center justify-center">
-                    <div class="w-full h-full opacity-30" style="background-image: radial-gradient(circle, #eff6ff 2px, transparent 2.5px); background-size: 30px 15px;"></div>
-                </div>
-
-                <!-- Action Prompt UI -->
-                <div id="action-prompt" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 px-6 py-3 rounded-full shadow-lg font-bold text-blue-600 text-sm md:text-base opacity-0 transition-opacity z-20 border-2 border-blue-300">
-                    <span id="prompt-text" class="animate-pulse">💬 Talk</span>
-                </div>
-
-                <!-- DIALOGUE BOX UI -->
-                <div id="dialogue-box" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-11/12 bg-white/95 border-4 border-blue-400 rounded-xl p-4 shadow-2xl hidden z-30 cursor-pointer">
-                    <h4 class="font-bold text-blue-600 mb-1 font-heading text-lg">Kero</h4>
-                    <p id="dialogue-text" class="text-sm md:text-base text-slate-700 font-semibold"></p>
-                    <p class="text-xs text-slate-400 text-right mt-2 animate-pulse font-bold">Tap here to continue ▼</p>
-                </div>
-
-                <!-- THE NPC: Kero (Left Side) -->
-                <div id="kero-npc" class="absolute w-20 h-20 md:w-28 md:h-28 z-10" style="left: 15%; top: 40%;">
-                    <div class="absolute bottom-1 left-1/4 w-1/2 h-2 bg-black/20 rounded-full blur-[2px]"></div>
-                    <div id="kero-sprite" class="absolute inset-0"></div>
-                </div>
-
-                <!-- THE PLAYER: Kayii -->
-                <div id="rpg-player" class="absolute w-20 h-20 md:w-28 md:h-28 z-20" style="left: 60px; top: 120px;">
-                    <div class="absolute bottom-1 left-1/4 w-1/2 h-2 bg-black/20 rounded-full blur-[2px]"></div>
-                    <div id="player-sprite" class="absolute inset-0"></div>
-                </div>
-            </div>
-
-            <!-- CONTROLS & ACTION BUTTONS -->
-            <div id="rpg-controls" class="w-full mt-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0 px-2">
-                <!-- Mobile D-Pad Buttons -->
-                <div class="grid grid-cols-3 gap-1 md:hidden">
-                    <div></div><button class="d-btn no-select" id="btn-up">W</button><div></div>
-                    <button class="d-btn no-select" id="btn-left">A</button><button class="d-btn no-select" id="btn-down">S</button><button class="d-btn no-select" id="btn-right">D</button>
-                </div>
-                
-                <!-- Explicit Mobile Action Button -->
-                <button id="mobile-action-btn" class="no-select md:hidden bg-pastel-dark text-white font-bold py-4 px-12 rounded-xl shadow-md active:translate-y-[4px] active:shadow-none text-lg">
-                    Action
-                </button>
-
-                <!-- Instructions/Prompt area for Desktop -->
-                <p class="hidden md:block text-slate-400 font-bold text-sm">Keyboard: WASD / Arrow Keys. Near Kero/Water, press 'SPACE' or Click Action.</p>
-
-                <!-- Existing Action Button (for desktop) -->
-                <button id="rpg-action-btn" class="hidden md:block bg-slate-300 text-slate-500 font-bold py-4 px-12 rounded-xl shadow-md transition-all text-lg opacity-50 cursor-not-allowed">
-                    Action
-                </button>
-            </div>
-
-            <!-- FISHING MINIGAME UI -->
-            <div id="game-ui" class="relative w-full h-72 md:h-[480px] flex-col items-center justify-center z-10 hidden transition-all duration-300 border-4 border-white rounded-xl shadow-inner overflow-hidden">
-                <div class="absolute inset-0 game-bg-layer bg-fishing transition-opacity duration-1000" id="game-bg-layer"></div>
-
-                <div class="relative z-20 w-full h-full flex flex-col items-center justify-center pt-8">
-                    <p class="text-white font-heading mb-6 text-center font-bold text-2xl md:text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] bg-black/40 px-6 py-3 rounded-full">🎣 Cast Line!</p>
-                    <div class="flex flex-row h-40 md:h-64 w-full justify-center gap-6 mb-8">
-                        <div class="relative w-12 md:w-16 h-full bg-blue-900/40 rounded-lg overflow-hidden border-2 border-white shadow-inner">
-                            <div id="catch-bar" class="absolute w-full h-[30%] bg-green-400/80 transition-colors duration-150" style="bottom: 0%;"></div>
-                            <div id="fish-icon" class="absolute w-full h-10 text-3xl md:text-4xl flex items-center justify-center select-none" style="bottom: 10%;">🐟</div>
-                        </div>
-                        <div class="relative w-5 md:w-6 h-full bg-slate-800/40 rounded-full overflow-hidden border-2 border-white">
-                            <div id="progress-fill" class="absolute bottom-0 w-full bg-green-500 transition-all duration-100" style="height: 15%;"></div>
-                        </div>
-                    </div>
-                    <button id="reel-action-btn" class="no-select bg-green-500 text-white font-bold py-4 px-10 md:px-16 rounded-full shadow-[0_6px_0_#166534] active:shadow-[0_0px_0_#166534] active:translate-y-[6px] transform transition-all cursor-pointer text-lg md:text-xl">
-                        🎣 HOLD TO REEL
-                    </button>
-                </div>
-            </div>
-
-            <!-- Cinematic Result Layer -->
-            <div id="cinematic-result" class="relative w-full h-72 md:h-[480px] z-30 transition-opacity duration-1000 opacity-0 hidden rounded-xl flex items-center justify-center flex-col p-4 md:p-10 text-center border-4 border-white shadow-inner overflow-hidden">
-                <div class="absolute inset-0 cinematic-bg-layer bg-caught transition-opacity duration-1000" id="cinematic-bg-layer"></div>
-                
-                <div class="relative z-40 bg-black/50 p-6 md:p-10 rounded-3xl shadow-2xl border-4 border-white/50 flex flex-col items-center">
-                    <div class="text-5xl md:text-9xl mb-4 md:mb-8 animate-float">✨🐟✨</div>
-                    <h4 class="font-heading font-bold text-3xl md:text-6xl text-white mb-2 md:mb-4 drop-shadow-[0_3px_3px_rgba(0,0,0,0.8)]">Perfect Catch!</h4>
-                    <p class="text-white/90 font-semibold text-center text-lg md:text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">You did it, Kayii!</p>
-                    <p class="text-white/70 text-base md:text-xl mt-4 md:mt-6 animate-pulse">Unlocking your gift in <span id="cinematic-timer" class="font-bold text-2xl">10</span>s...</p>
-                </div>
-            </div>
-
-            <!-- Fish Fail Layer -->
-            <div id="fish-fail" class="hidden relative w-full h-72 md:h-[480px] flex-col items-center justify-center z-10 bg-red-50 p-10 rounded-xl shadow-inner border-4 border-red-400">
-                <div class="text-6xl mb-4">🌿</div>
-                <h4 class="font-heading font-bold text-2xl text-red-500 mb-2">It got away...</h4>
-                <p class="text-slate-600 text-base">Just seaweed this time.</p>
-                <button onclick="resetToRPG()" class="mt-6 text-base text-white font-bold px-6 py-3 rounded bg-red-400 hover:bg-red-500 transition-colors shadow-md">Try again?</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- 2. The Hidden Reward -->
-    <div id="secret-content" class="w-full relative overflow-x-hidden min-h-screen" style="display: none; opacity: 0; transition: opacity 1.5s ease-in-out;">
-        <!-- Absolute Full Height Backgrounds for flawless mobile scaling -->
-        <div class="absolute inset-0 floral-bg-1 z-0 pointer-events-none w-full h-full"></div>
-        <div class="absolute inset-0 floral-bg-2 z-0 pointer-events-none w-full h-full"></div>
-        
-        <div class="w-full flex flex-col items-center relative z-10">
-            
-            <!-- Mobile-Perfect Centered Hero Section -->
-            <section id="hero-section" class="min-h-screen flex flex-col items-center justify-center text-center p-4 md:p-6 w-full relative pt-10 md:pt-20">
-                <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-6 sm:p-10 md:p-16 shadow-2xl border border-white flex flex-col items-center w-full max-w-[90vw] md:max-w-2xl mx-auto box-border">
-                    <div class="animate-float mb-6 md:mb-8 w-full flex justify-center">
-                        <svg class="w-full max-w-[200px] md:max-w-[250px] h-auto" viewBox="0 0 300 350" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M150 200 Q150 280 130 340" stroke="#86efac" stroke-width="8" stroke-linecap="round"/>
-                            <path d="M150 200 Q180 260 185 335" stroke="#86efac" stroke-width="8" stroke-linecap="round"/>
-                            <path d="M150 200 Q110 250 100 330" stroke="#86efac" stroke-width="8" stroke-linecap="round"/>
-                            <path d="M90 270 Q150 300 210 270 Q150 240 90 270 Z" fill="#fbcfe8"/>
-                            <path d="M150 270 L120 330 M150 270 L180 330" stroke="#fbcfe8" stroke-width="10" stroke-linecap="round"/>
-                            <circle cx="150" cy="130" r="65" fill="#a855f7" opacity="0.8"/>
-                            <circle cx="80" cy="150" r="55" fill="#60a5fa" opacity="0.8"/>
-                            <circle cx="220" cy="150" r="55" fill="#8b5cf6" opacity="0.8"/>
-                            <circle cx="110" cy="90" r="50" fill="#c084fc" opacity="0.9"/>
-                            <circle cx="190" cy="90" r="50" fill="#3b82f6" opacity="0.9"/>
-                            <circle cx="150" cy="180" r="45" fill="#d8b4fe" opacity="0.9"/>
-                            <circle cx="85" cy="200" r="35" fill="#93c5fd" opacity="0.9"/>
-                            <circle cx="215" cy="200" r="35" fill="#a78bfa" opacity="0.9"/>
-                            <circle cx="150" cy="50" r="40" fill="#e9d5ff" opacity="0.95"/>
-                            <circle cx="90" cy="120" r="30" fill="#bfdbfe" opacity="0.95"/>
-                            <circle cx="210" cy="120" r="30" fill="#c4b5fd" opacity="0.95"/>
-                            <circle cx="150" cy="120" r="30" fill="#60a5fa" opacity="0.95"/>
-                            <circle cx="60" cy="90" r="20" fill="#d8b4fe" opacity="0.8"/>
-                            <circle cx="240" cy="90" r="20" fill="#93c5fd" opacity="0.8"/>
-                            <circle cx="190" cy="40" r="22" fill="#a855f7" opacity="0.8"/>
-                            <circle cx="110" cy="40" r="22" fill="#3b82f6" opacity="0.8"/>
-                            <circle cx="150" cy="130" r="8" fill="#fef08a"/>
-                            <circle cx="110" cy="90" r="7" fill="#fef08a"/>
-                            <circle cx="190" cy="90" r="7" fill="#fef08a"/>
-                            <circle cx="150" cy="50" r="6" fill="#fef08a"/>
-                            <circle cx="80" cy="150" r="7" fill="#fef08a"/>
-                            <circle cx="220" cy="150" r="7" fill="#fef08a"/>
-                            <circle cx="150" cy="180" r="6" fill="#fef08a"/>
-                            <circle cx="90" cy="120" r="5" fill="#fef08a"/>
-                            <circle cx="210" cy="120" r="5" fill="#fef08a"/>
-                            <circle cx="85" cy="200" r="5" fill="#fef08a"/>
-                            <circle cx="215" cy="200" r="5" fill="#fef08a"/>
-                            <path d="M40 120 L45 105 L50 120 L45 135 Z" fill="#fef08a"/>
-                            <path d="M260 140 L265 125 L270 140 L265 155 Z" fill="#fef08a"/>
-                            <path d="M150 5 L155 -10 L160 5 L155 20 Z" fill="#fef08a"/>
-                        </svg>
-                    </div>
-                    <h1 class="font-heading text-4xl sm:text-5xl md:text-7xl font-bold text-pastel-dark mb-2 md:mb-4 drop-shadow-sm leading-tight w-full">Congratulations!</h1>
-                    <h2 class="text-xl sm:text-2xl md:text-3xl text-slate-500 font-semibold w-full">You did it, Kayii! 🎓</h2>
-                </div>
-            </section>
-
-            <!-- Mobile Perfect Envelope (Forced inline click override) -->
-            <section id="letter-section" class="py-16 px-4 md:px-6 max-w-2xl mx-auto flex flex-col items-center w-full">
-                <div class="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 w-full shadow-xl border border-white flex flex-col items-center">
-                    <h3 class="font-heading text-2xl md:text-3xl font-semibold text-center mb-8 md:mb-10 text-pastel-dark">A Letter For You</h3>
-                    
-                    <!-- Added pure HTML onclick toggle to force mobile tap detection -->
-                    <div id="envelope-container" class="envelope-container relative w-full max-w-md cursor-pointer group z-20 no-select" onclick="this.classList.toggle('open')">
-                        
-                        <!-- Invisible overlay button just to be absolutely sure the tap registers -->
-                        <div class="absolute inset-0 z-50 w-full h-full"></div>
-                        
-                        <div class="bg-blue-300 w-full h-48 rounded-t-xl absolute top-0 left-0 z-0"></div>
-                        <div class="letter-content absolute top-10 left-0 w-full px-4 z-10 drop-shadow-xl pointer-events-none">
-                            <div class="letter-inner bg-white p-6 rounded-xl shadow-inner border border-blue-50 text-sm md:text-base pointer-events-auto">
-                                <p class="mb-4">Dear Kayii,</p>
-                                <p class="mb-4">I am so incredibly proud of you! All those late nights, stressful practicals, and hard work have finally paid off. You are officially a dentist! 🦷</p>
-                                <p class="mb-4">While I am still debugging code and surviving my IT classes, it is so inspiring to watch you clear this massive milestone. Whether we are gaming, watching our favorite shows, or just hanging out, you are the best Player 2 I could ask for. I can't wait to see what amazing things you do next!</p>
-                                <p class="font-semibold text-pastel-dark text-right">- Kero</p>
-                            </div>
-                        </div>
-                        <div class="bg-blue-200 w-full h-48 rounded-xl relative z-20 flex items-center justify-center shadow-lg transition-transform group-hover:scale-[1.02]">
-                            <span class="text-blue-500 font-bold tracking-widest uppercase opacity-50 pointer-events-none">Tap to open</span>
-                            <svg class="envelope-flap absolute top-0 left-0 w-full h-full drop-shadow-md pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100"><polygon points="0,0 100,0 50,55" fill="#93C5FD" stroke="#60A5FA" stroke-width="1" stroke-linejoin="round"/></svg>
-                            <svg class="absolute bottom-0 left-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
-                                <polygon points="0,100 50,45 100,100" fill="#BFDBFE" stroke="#93C5FD" stroke-width="1" stroke-linejoin="round"/>
-                                <polygon points="0,0 0,100 50,45" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1" stroke-linejoin="round"/>
-                                <polygon points="100,0 100,100 50,45" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="h-96 hidden md:block"></div>
-                    <div class="h-[30rem] block md:hidden"></div>
-                </div>
-            </section>
-
-            <!-- Our Co-op Team Section -->
-            <section id="coop-section" class="py-16 px-4 md:px-6 max-w-5xl mx-auto text-center relative z-10 w-full">
-                <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border border-white">
-                    <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-4 text-pastel-dark tracking-wide">Our Co-op Team</h3>
-                    <p class="text-slate-500 mb-10 max-w-lg mx-auto text-sm md:text-base">Like May and Cody (but with way less arguing and definitely no Book of Love), we make the ultimate team.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-1.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
-                        <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-2.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
-                        <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-3.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Our Memories Section (Mobile Video Preload FIX) -->
-            <section id="memories-section" class="py-16 px-4 md:px-6 max-w-5xl mx-auto text-center my-8 w-full">
-                <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border border-white">
-                    <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-2 text-pastel-dark">Our Memories</h3>
-                    <p class="text-slate-500 mb-8 text-sm md:text-base">From epic boss fights to our favorite gaming and movie nights.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-md relative group flex items-center justify-center border-2 border-white">
-                            <!-- preload="none" forces the phone to show the poster image instead of a broken black frame! -->
-                            <video src="boss-fight.mp4" playsinline preload="none" controls class="w-full h-full object-cover" poster="https://via.placeholder.com/640x360/1e293b/ffffff?text=Tap+to+Play!"></video>
-                        </div>
-                        <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="stardew-fishing.png" alt="Stardew Valley" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
-                        <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
-                        <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
-                    </div>
-                </div>
-            </section>
-
-            <footer class="text-center py-10 text-slate-500 font-bold text-sm w-full backdrop-blur-sm">Designed by Angelo.</footer>
-        </div>
+    <div id="portrait-warning" class="fixed inset-0 z-50 bg-slate-900 text-white flex-col items-center justify-center p-8 text-center" style="display: none;">
+        <div class="text-7xl mb-6 animate-bounce">🎮</div>
+        <h2 class="font-heading text-4xl font-bold mb-4 text-pastel-dark">Player 2, Wait!</h2>
+        <p class="text-xl text-slate-300 max-w-sm mx-auto leading-relaxed">This graduation gift requires a widescreen view to play.</p>
+        <p class="text-lg text-slate-400 mt-8 bg-slate-800 p-4 rounded-xl border-2 border-slate-700">Please rotate your device sideways, or hop on your laptop!</p>
     </div>
 
-    <!-- Interactive Logic -->
-    <script>
+    <div id="main-content-wrapper">
+        
+        <section id="gatekeeper-section" class="min-h-screen flex flex-col items-center justify-center px-4 relative z-20 transition-opacity duration-1000">
+            <h1 class="font-heading text-4xl md:text-5xl font-bold text-pastel-dark mb-2 text-center mt-6">Unlock Your Gift</h1>
+            <p id="game-instructions" class="text-slate-500 mb-6 text-center text-sm md:text-base max-w-sm">Use the D-Pad or Arrow Keys. Go talk to Kero!</p>
+
+            <div class="bg-blue-50 rounded-3xl p-4 md:p-8 border-4 border-blue-200 shadow-xl relative w-full max-w-4xl flex flex-col items-center justify-center mb-6">
+                
+                <div id="rpg-container" class="relative w-full h-72 md:h-[480px] bg-green-300 rounded-xl overflow-hidden border-4 border-green-500 shadow-inner flex flex-col transition-all duration-300">
+                    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#166534 2px, transparent 2px); background-size: 20px 20px;"></div>
+                    
+                    <div id="water-zone" class="absolute right-0 top-0 w-1/3 h-full bg-blue-400 border-l-4 border-blue-300 flex items-center justify-center">
+                        <div class="w-full h-full opacity-30" style="background-image: radial-gradient(circle, #eff6ff 2px, transparent 2.5px); background-size: 30px 15px;"></div>
+                    </div>
+
+                    <div id="action-prompt" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 px-6 py-3 rounded-full shadow-lg font-bold text-blue-600 text-sm md:text-base opacity-0 transition-opacity z-20 border-2 border-blue-300">
+                        <span id="prompt-text" class="animate-pulse">💬 Talk</span>
+                    </div>
+
+                    <div id="dialogue-box" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-11/12 bg-white/95 border-4 border-blue-400 rounded-xl p-4 shadow-2xl hidden z-30 cursor-pointer">
+                        <h4 class="font-bold text-blue-600 mb-1 font-heading text-lg">Kero</h4>
+                        <p id="dialogue-text" class="text-sm md:text-base text-slate-700 font-semibold"></p>
+                        <p class="text-xs text-slate-400 text-right mt-2 animate-pulse font-bold">Tap here to continue ▼</p>
+                    </div>
+
+                    <div id="kero-npc" class="absolute w-20 h-20 md:w-28 md:h-28 z-10" style="left: 15%; top: 40%;">
+                        <div class="absolute bottom-1 left-1/4 w-1/2 h-2 bg-black/20 rounded-full blur-[2px]"></div>
+                        <div id="kero-sprite" class="absolute inset-0"></div>
+                    </div>
+
+                    <div id="rpg-player" class="absolute w-20 h-20 md:w-28 md:h-28 z-20" style="left: 60px; top: 120px;">
+                        <div class="absolute bottom-1 left-1/4 w-1/2 h-2 bg-black/20 rounded-full blur-[2px]"></div>
+                        <div id="player-sprite" class="absolute inset-0"></div>
+                    </div>
+                </div>
+
+                <div id="rpg-controls" class="w-full mt-6 flex flex-row items-center justify-between gap-4 px-2">
+                    
+                    <div class="touch-only grid grid-cols-3 gap-1">
+                        <div></div><button class="d-btn no-select" id="btn-up">W</button><div></div>
+                        <button class="d-btn no-select" id="btn-left">A</button><button class="d-btn no-select" id="btn-down">S</button><button class="d-btn no-select" id="btn-right">D</button>
+                    </div>
+                    
+                    <button id="mobile-action-btn" class="touch-only no-select bg-pastel-dark text-white font-bold py-4 px-12 rounded-xl shadow-md active:translate-y-[4px] active:shadow-none text-lg">
+                        Action
+                    </button>
+
+                    <div class="mouse-only w-full flex justify-between items-center px-4">
+                        <p class="text-slate-400 font-bold text-sm">Keyboard: WASD / Arrow Keys. Near Kero/Water, press 'SPACE' or Click Action.</p>
+                        <button id="rpg-action-btn" class="bg-slate-300 text-slate-500 font-bold py-4 px-12 rounded-xl shadow-md transition-all text-lg opacity-50 cursor-not-allowed">
+                            Action
+                        </button>
+                    </div>
+                </div>
+
+                <div id="game-ui" class="relative w-full h-72 md:h-[480px] flex-col items-center justify-center z-10 hidden transition-all duration-300 border-4 border-white rounded-xl shadow-inner overflow-hidden">
+                    <div class="absolute inset-0 game-bg-layer bg-fishing transition-opacity duration-1000" id="game-bg-layer"></div>
+
+                    <div class="relative z-20 w-full h-full flex flex-col items-center justify-center pt-8">
+                        <p class="text-white font-heading mb-6 text-center font-bold text-2xl md:text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] bg-black/40 px-6 py-3 rounded-full">🎣 Cast Line!</p>
+                        <div class="flex flex-row h-40 md:h-64 w-full justify-center gap-6 mb-8">
+                            <div class="relative w-12 md:w-16 h-full bg-blue-900/40 rounded-lg overflow-hidden border-2 border-white shadow-inner">
+                                <div id="catch-bar" class="absolute w-full h-[30%] bg-green-400/80 transition-colors duration-150" style="bottom: 0%;"></div>
+                                <div id="fish-icon" class="absolute w-full h-10 text-3xl md:text-4xl flex items-center justify-center select-none" style="bottom: 10%;">🐟</div>
+                            </div>
+                            <div class="relative w-5 md:w-6 h-full bg-slate-800/40 rounded-full overflow-hidden border-2 border-white">
+                                <div id="progress-fill" class="absolute bottom-0 w-full bg-green-500 transition-all duration-100" style="height: 15%;"></div>
+                            </div>
+                        </div>
+                        <button id="reel-action-btn" class="no-select bg-green-500 text-white font-bold py-4 px-10 md:px-16 rounded-full shadow-[0_6px_0_#166534] active:shadow-[0_0px_0_#166534] active:translate-y-[6px] transform transition-all cursor-pointer text-lg md:text-xl">
+                            🎣 HOLD TO REEL
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cinematic-result" class="relative w-full h-72 md:h-[480px] z-30 transition-opacity duration-1000 opacity-0 hidden rounded-xl flex items-center justify-center flex-col p-4 md:p-10 text-center border-4 border-white shadow-inner overflow-hidden">
+                    <div class="absolute inset-0 cinematic-bg-layer bg-caught transition-opacity duration-1000" id="cinematic-bg-layer"></div>
+                    
+                    <div class="relative z-40 bg-black/50 p-6 md:p-10 rounded-3xl shadow-2xl border-4 border-white/50 flex flex-col items-center">
+                        <div class="text-5xl md:text-9xl mb-4 md:mb-8 animate-float">✨🐟✨</div>
+                        <h4 class="font-heading font-bold text-3xl md:text-6xl text-white mb-2 md:mb-4 drop-shadow-[0_3px_3px_rgba(0,0,0,0.8)]">Perfect Catch!</h4>
+                        <p class="text-white/90 font-semibold text-center text-lg md:text-3xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">You did it, Kayii!</p>
+                        <p class="text-white/70 text-base md:text-xl mt-4 md:mt-6 animate-pulse">Unlocking your gift in <span id="cinematic-timer" class="font-bold text-2xl">10</span>s...</p>
+                    </div>
+                </div>
+
+                <div id="fish-fail" class="hidden relative w-full h-72 md:h-[480px] flex-col items-center justify-center z-10 bg-red-50 p-10 rounded-xl shadow-inner border-4 border-red-400">
+                    <div class="text-6xl mb-4">🌿</div>
+                    <h4 class="font-heading font-bold text-2xl text-red-500 mb-2">It got away...</h4>
+                    <p class="text-slate-600 text-base">Just seaweed this time.</p>
+                    <button onclick="resetToRPG()" class="mt-6 text-base text-white font-bold px-6 py-3 rounded bg-red-400 hover:bg-red-500 transition-colors shadow-md">Try again?</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="secret-content" class="w-full relative overflow-x-hidden min-h-screen" style="display: none; opacity: 0; transition: opacity 1.5s ease-in-out;">
+            <div class="absolute inset-0 floral-bg-1 z-0 pointer-events-none w-full h-full"></div>
+            <div class="absolute inset-0 floral-bg-2 z-0 pointer-events-none w-full h-full"></div>
+            
+            <div class="w-full flex flex-col items-center relative z-10">
+                
+                <section id="hero-section" class="min-h-screen flex flex-col items-center justify-center text-center p-4 md:p-6 w-full relative pt-10 md:pt-20">
+                    <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-6 sm:p-10 md:p-16 shadow-2xl border border-white flex flex-col items-center w-full max-w-[90vw] md:max-w-2xl mx-auto box-border">
+                        <div class="animate-float mb-6 md:mb-8 w-full flex justify-center">
+                            <svg class="w-full max-w-[200px] md:max-w-[250px] h-auto" viewBox="0 0 300 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M150 200 Q150 280 130 340" stroke="#86efac" stroke-width="8" stroke-linecap="round"/>
+                                <path d="M150 200 Q180 260 185 335" stroke="#86efac" stroke-width="8" stroke-linecap="round"/>
+                                <path d="M150 200 Q110 250 100 330" stroke="#86efac" stroke-width="8" stroke-linecap="round"/>
+                                <path d="M90 270 Q150 300 210 270 Q150 240 90 270 Z" fill="#fbcfe8"/>
+                                <path d="M150 270 L120 330 M150 270 L180 330" stroke="#fbcfe8" stroke-width="10" stroke-linecap="round"/>
+                                <circle cx="150" cy="130" r="65" fill="#a855f7" opacity="0.8"/>
+                                <circle cx="80" cy="150" r="55" fill="#60a5fa" opacity="0.8"/>
+                                <circle cx="220" cy="150" r="55" fill="#8b5cf6" opacity="0.8"/>
+                                <circle cx="110" cy="90" r="50" fill="#c084fc" opacity="0.9"/>
+                                <circle cx="190" cy="90" r="50" fill="#3b82f6" opacity="0.9"/>
+                                <circle cx="150" cy="180" r="45" fill="#d8b4fe" opacity="0.9"/>
+                                <circle cx="85" cy="200" r="35" fill="#93c5fd" opacity="0.9"/>
+                                <circle cx="215" cy="200" r="35" fill="#a78bfa" opacity="0.9"/>
+                                <circle cx="150" cy="50" r="40" fill="#e9d5ff" opacity="0.95"/>
+                                <circle cx="90" cy="120" r="30" fill="#bfdbfe" opacity="0.95"/>
+                                <circle cx="210" cy="120" r="30" fill="#c4b5fd" opacity="0.95"/>
+                                <circle cx="150" cy="120" r="30" fill="#60a5fa" opacity="0.95"/>
+                                <circle cx="60" cy="90" r="20" fill="#d8b4fe" opacity="0.8"/>
+                                <circle cx="240" cy="90" r="20" fill="#93c5fd" opacity="0.8"/>
+                                <circle cx="190" cy="40" r="22" fill="#a855f7" opacity="0.8"/>
+                                <circle cx="110" cy="40" r="22" fill="#3b82f6" opacity="0.8"/>
+                                <circle cx="150" cy="130" r="8" fill="#fef08a"/>
+                                <circle cx="110" cy="90" r="7" fill="#fef08a"/>
+                                <circle cx="190" cy="90" r="7" fill="#fef08a"/>
+                                <circle cx="150" cy="50" r="6" fill="#fef08a"/>
+                                <circle cx="80" cy="150" r="7" fill="#fef08a"/>
+                                <circle cx="220" cy="150" r="7" fill="#fef08a"/>
+                                <circle cx="150" cy="180" r="6" fill="#fef08a"/>
+                                <circle cx="90" cy="120" r="5" fill="#fef08a"/>
+                                <circle cx="210" cy="120" r="5" fill="#fef08a"/>
+                                <circle cx="85" cy="200" r="5" fill="#fef08a"/>
+                                <circle cx="215" cy="200" r="5" fill="#fef08a"/>
+                                <path d="M40 120 L45 105 L50 120 L45 135 Z" fill="#fef08a"/>
+                                <path d="M260 140 L265 125 L270 140 L265 155 Z" fill="#fef08a"/>
+                                <path d="M150 5 L155 -10 L160 5 L155 20 Z" fill="#fef08a"/>
+                            </svg>
+                        </div>
+                        <h1 class="font-heading text-4xl sm:text-5xl md:text-7xl font-bold text-pastel-dark mb-2 md:mb-4 drop-shadow-sm leading-tight w-full">Congratulations!</h1>
+                        <h2 class="text-xl sm:text-2xl md:text-3xl text-slate-500 font-semibold w-full">You did it, Kayii! 🎓</h2>
+                    </div>
+                </section>
+
+                <section id="letter-section" class="py-16 px-4 md:px-6 max-w-2xl mx-auto flex flex-col items-center w-full">
+                    <div class="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 w-full shadow-xl border border-white flex flex-col items-center">
+                        <h3 class="font-heading text-2xl md:text-3xl font-semibold text-center mb-8 md:mb-10 text-pastel-dark">A Letter For You</h3>
+                        
+                        <div id="envelope-container" class="envelope-container relative w-full max-w-md cursor-pointer group z-20 no-select" onclick="this.classList.toggle('open')">
+                            
+                            <div class="absolute inset-0 z-50 w-full h-full"></div>
+                            
+                            <div class="bg-blue-300 w-full h-48 rounded-t-xl absolute top-0 left-0 z-0"></div>
+                            <div class="letter-content absolute top-10 left-0 w-full px-4 z-10 drop-shadow-xl pointer-events-none">
+                                <div class="letter-inner bg-white p-6 rounded-xl shadow-inner border border-blue-50 text-sm md:text-base pointer-events-auto">
+                                    <p class="mb-4">Dear Kayii,</p>
+                                    <p class="mb-4">I am so incredibly proud of you! All those late nights, stressful practicals, and hard work have finally paid off. You are officially a dentist! 🦷</p>
+                                    <p class="mb-4">While I am still debugging code and surviving my IT classes, it is so inspiring to watch you clear this massive milestone. Whether we are gaming, watching our favorite shows, or just hanging out, you are the best Player 2 I could ask for. I can't wait to see what amazing things you do next!</p>
+                                    <p class="font-semibold text-pastel-dark text-right">- Kero</p>
+                                </div>
+                            </div>
+                            <div class="bg-blue-200 w-full h-48 rounded-xl relative z-20 flex items-center justify-center shadow-lg transition-transform group-hover:scale-[1.02]">
+                                <span class="text-blue-500 font-bold tracking-widest uppercase opacity-50 pointer-events-none">Tap to open</span>
+                                <svg class="envelope-flap absolute top-0 left-0 w-full h-full drop-shadow-md pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100"><polygon points="0,0 100,0 50,55" fill="#93C5FD" stroke="#60A5FA" stroke-width="1" stroke-linejoin="round"/></svg>
+                                <svg class="absolute bottom-0 left-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                    <polygon points="0,100 50,45 100,100" fill="#BFDBFE" stroke="#93C5FD" stroke-width="1" stroke-linejoin="round"/>
+                                    <polygon points="0,0 0,100 50,45" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1" stroke-linejoin="round"/>
+                                    <polygon points="100,0 100,100 50,45" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="h-96 hidden md:block"></div>
+                        <div class="h-[30rem] block md:hidden"></div>
+                    </div>
+                </section>
+
+                <section id="coop-section" class="py-16 px-4 md:px-6 max-w-5xl mx-auto text-center relative z-10 w-full">
+                    <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border border-white">
+                        <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-4 text-pastel-dark tracking-wide">Our Co-op Team</h3>
+                        <p class="text-slate-500 mb-10 max-w-lg mx-auto text-sm md:text-base">Like May and Cody (but with way less arguing and definitely no Book of Love), we make the ultimate team.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-1.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
+                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-2.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
+                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-3.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="memories-section" class="py-16 px-4 md:px-6 max-w-5xl mx-auto text-center my-8 w-full">
+                    <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border border-white">
+                        <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-2 text-pastel-dark">Our Memories</h3>
+                        <p class="text-slate-500 mb-8 text-sm md:text-base">From epic boss fights to our favorite gaming and movie nights.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-md relative group flex items-center justify-center border-2 border-white">
+                                <video src="boss-fight.mp4#t=0.001" playsinline preload="none" controls class="w-full h-full object-cover" poster="https://via.placeholder.com/640x360/1e293b/ffffff?text=Tap+to+Play!"></video>
+                            </div>
+                            <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="stardew-fishing.png" alt="Stardew Valley" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
+                            <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
+                            <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="text-center py-10 text-slate-500 font-bold text-sm w-full backdrop-blur-sm">Designed by Angelo.</footer>
+            </div>
+        </div>
+    </div> <script>
         // --- RPG & NPC VARIABLES ---
         const rpgContainer = document.getElementById('rpg-container');
         const rpgPlayer = document.getElementById('rpg-player');
@@ -387,12 +394,20 @@
         };
         bindBtn('btn-up', 'w'); bindBtn('btn-left', 'a'); bindBtn('btn-down', 's'); bindBtn('btn-right', 'd');
         
-        mobileActionBtn.addEventListener('touchstart', (e) => { 
+        // Mobile Action Button Listeners
+        const handleActionPress = (e) => { 
             e.preventDefault(); 
             if(rpgActive || dialogueActive) triggerAction(); 
-        });
+        };
+        mobileActionBtn.addEventListener('mousedown', handleActionPress);
+        mobileActionBtn.addEventListener('touchstart', handleActionPress, {passive: false});
         
+        // Dialogue Box Advance
         dialogueBox.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if(dialogueActive) triggerAction();
+        });
+        dialogueBox.addEventListener('mousedown', (e) => {
             e.preventDefault();
             if(dialogueActive) triggerAction();
         });
