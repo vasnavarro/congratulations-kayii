@@ -92,7 +92,6 @@
         .touch-device-flex { display: none !important; }
         
         @media (pointer: coarse) {
-            /* Now explicitly forces Grid for WASD so it doesn't flatten out! */
             .touch-device-grid { display: grid !important; }
             .touch-device-flex { display: flex !important; }
             .mouse-only { display: none !important; }
@@ -317,8 +316,8 @@
                         <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-2 text-pastel-dark">Our Memories</h3>
                         <p class="text-slate-500 mb-8 text-sm md:text-base">From epic boss fights to our favorite gaming and movie nights.</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-md relative group flex items-center justify-center border-2 border-white">
-                                <video src="boss-fight.mp4#t=0.001" playsinline preload="none" controls class="w-full h-full object-cover" poster="https://via.placeholder.com/640x360/1e293b/ffffff?text=Tap+to+Play!"></video>
+                            <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-md relative group flex items-center justify-center border-2 border-white transform-gpu will-change-transform">
+                                <video src="boss-fight.mp4#t=0.001" playsinline preload="none" controls class="w-full h-full object-cover transform-gpu"></video>
                             </div>
                             <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="stardew-fishing.png" alt="Stardew Valley" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
                             <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
@@ -331,18 +330,16 @@
             </div>
         </div>
     </div> <script>
-        // --- THE SCROLL INTERSECTION OBSERVER (Auto-Opens Envelope) ---
+        // --- THE SCROLL INTERSECTION OBSERVER ---
         const envContainer = document.getElementById('envelope-container');
         if (envContainer) {
             const envObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    // When the envelope comes into view, open it!
                     if (entry.isIntersecting) {
                         entry.target.classList.add('open');
                     }
                 });
-            }, { threshold: 0.6 }); // Triggers when 60% of the envelope is visible
-            
+            }, { threshold: 0.6 }); 
             envObserver.observe(envContainer);
         }
 
@@ -378,7 +375,7 @@
 
         // --- MOVEMENT ENGINE ---
         let rpgActive = true;
-        let pX = 60; let pY = 120; // Initialize correctly based on CSS
+        let pX = 60; let pY = 120; 
         const speed = 3.5;
         const keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowleft: false, arrowdown: false, arrowright: false, " ": false };
 
@@ -392,7 +389,6 @@
             if(keys.hasOwnProperty(key)) keys[key] = false; 
         });
 
-        // Bind mobile D-Pad buttons
         const bindBtn = (id, k) => {
             const el = document.getElementById(id);
             const press = (e) => { e.preventDefault(); if(rpgActive) keys[k] = true; el.classList.add('active'); };
@@ -401,7 +397,6 @@
         };
         bindBtn('btn-up', 'w'); bindBtn('btn-left', 'a'); bindBtn('btn-down', 's'); bindBtn('btn-right', 'd');
         
-        // Mobile Action Button Listeners
         const handleActionPress = (e) => { 
             e.preventDefault(); 
             if(rpgActive || dialogueActive) triggerAction(); 
@@ -409,36 +404,22 @@
         mobileActionBtn.addEventListener('mousedown', handleActionPress);
         mobileActionBtn.addEventListener('touchstart', handleActionPress, {passive: false});
         
-        // Dialogue Box Advance
-        dialogueBox.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if(dialogueActive) triggerAction();
-        });
-        dialogueBox.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            if(dialogueActive) triggerAction();
-        });
+        dialogueBox.addEventListener('touchstart', (e) => { e.preventDefault(); if(dialogueActive) triggerAction(); });
+        dialogueBox.addEventListener('mousedown', (e) => { e.preventDefault(); if(dialogueActive) triggerAction(); });
 
-        // Player Animation Vars
         let frameCount = 0; let animIndex = 0; let currentFacing = 0; 
-        
-        // Kero (Follower) Animation Vars
         let kX = -1; let kY = -1; 
         let kFrameCount = 0; let kAnimIndex = 0; let kFacing = 0; let kScale = 1;
         let pXInit = false; 
-        
-        // State Machine for Context-Sensitive Actions
         let currentAction = "none"; 
 
         function rpgLoop() {
             if (!rpgActive && !dialogueActive) return;
 
-            // Fix starting positions based on CSS on first frame
             if (kX === -1) { kX = keroNpc.offsetLeft; kY = keroNpc.offsetTop; }
             if (!pXInit) { pX = rpgPlayer.offsetLeft; pY = rpgPlayer.offsetTop; pXInit = true; }
 
             if (rpgActive) {
-                // 1. PLAYER MOVEMENT
                 let isMoving = false;
                 let moveX = 0; let moveY = 0;
 
@@ -453,16 +434,14 @@
                 const pW = rpgPlayer.clientWidth; const pH = rpgPlayer.clientHeight;
                 const maxRightX = mapW * (2/3) - (pW * 0.6); 
 
-                if (pX < 0) pX = 0; if (pX > maxRightX) pX = maxRightX; // Wall applied!
+                if (pX < 0) pX = 0; if (pX > maxRightX) pX = maxRightX; 
                 if (pY < 0) pY = 0; if (pY > mapH - pH) pY = mapH - pH;
 
                 rpgPlayer.style.left = pX + 'px'; rpgPlayer.style.top = pY + 'px';
 
-                // Player Animation cycle
                 if (isMoving) { frameCount++; if (frameCount > 8) { animIndex++; if (animIndex > 3) animIndex = 1; frameCount = 0; } } else { animIndex = 0; }
                 let xPos = animIndex * 33.333; playerSprite.style.backgroundPosition = `${xPos}% ${currentFacing}%`;
 
-                // 2. KERO POKEMON FOLLOWER AI
                 if (hasTalkedToKero) {
                     let kIsMoving = false;
                     let dx = pX - kX; let dy = pY - kY; let dist = Math.sqrt(dx*dx + dy*dy);
@@ -478,7 +457,6 @@
                     let kXPos = kAnimIndex * 33.333; keroSprite.style.backgroundPosition = `${kXPos}% ${kFacing}%`; keroSprite.style.transform = `scaleX(${kScale})`;
                 }
 
-                // 3. UI CONTEXT CHECKS (Proximity)
                 const isNearKero = (pX < kX + pW + 20 && pX + pW > kX - 20 && pY < kY + pH + 20 && pY + pH > kY - 20);
                 const isNearWater = (pX >= maxRightX - 5); 
 
@@ -505,9 +483,8 @@
             actionPrompt.classList.add('opacity-0');
         }
 
-        rpgLoop(); // Start engine
+        rpgLoop();
 
-        // --- INTERACTION LOGIC (Context Sensitive) ---
         function triggerAction() {
             if (dialogueActive) { advanceDialogue(); return; }
             if (currentAction === "none") return;
@@ -540,7 +517,6 @@
 
         actionBtnUI.addEventListener('click', triggerAction);
 
-        // --- FISHING MINIGAME LOGIC (Cinematic Backgrounds) ---
         const gameBgLayer = document.getElementById('game-bg-layer');
         const catchBtn = document.getElementById('reel-action-btn');
         const catchBar = document.getElementById('catch-bar');
