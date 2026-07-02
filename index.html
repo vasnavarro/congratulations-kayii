@@ -233,14 +233,14 @@
                     </div>
                 </div>
 
-                <!-- Fish Fail Layer (Updated with Try Again / Exit Buttons!) -->
+                <!-- Fish Fail Layer (MOBILE PROOFED BUTTONS) -->
                 <div id="fish-fail" class="hidden relative w-full h-[500px] md:h-[600px] flex-col items-center justify-center z-10 bg-red-50 p-10 rounded-xl shadow-inner border-4 border-red-400">
                     <div class="text-6xl mb-4">🌿</div>
                     <h4 class="font-heading font-bold text-2xl text-red-500 mb-2">It got away...</h4>
                     <p class="text-slate-600 text-base">Just seaweed this time.</p>
                     <div class="flex flex-row gap-4 mt-8">
-                        <button onclick="retryFishing()" class="text-sm md:text-base text-white font-bold px-6 py-3 rounded-lg bg-red-500 hover:bg-red-600 transition-colors shadow-md">Try Again</button>
-                        <button onclick="exitToMap()" class="text-sm md:text-base text-slate-600 font-bold px-6 py-3 rounded-lg bg-slate-200 hover:bg-slate-300 transition-colors shadow-md border-2 border-slate-300">Exit to Map</button>
+                        <button id="btn-retry-fishing" class="text-sm md:text-base text-white font-bold px-6 py-3 rounded-lg bg-red-500 hover:bg-red-600 transition-colors shadow-md cursor-pointer">Try Again</button>
+                        <button id="btn-exit-map" class="text-sm md:text-base text-slate-600 font-bold px-6 py-3 rounded-lg bg-slate-200 hover:bg-slate-300 transition-colors shadow-md border-2 border-slate-300 cursor-pointer">Exit to Map</button>
                     </div>
                 </div>
             </div>
@@ -681,22 +681,34 @@
             }, 1000); 
         }
 
-        // --- NEW FAIL STATE FUNCTIONS ---
-        window.exitToMap = function() {
-            failMessage.classList.add('hidden'); failMessage.classList.remove('flex');
-            rpgContainer.classList.remove('hidden'); rpgControls.classList.remove('hidden'); instructions.classList.remove('hidden');
-            // Deliberately skipping the pX and pY reset so she stays right where she was!
-            rpgActive = true; 
-            requestAnimationFrame(rpgLoop);
-        }
+        // --- BULLETPROOF MOBILE FAIL STATE BUTTONS ---
+        const btnRetry = document.getElementById('btn-retry-fishing');
+        const btnExit = document.getElementById('btn-exit-map');
 
-        window.retryFishing = function() {
+        const doRetry = (e) => { 
+            e.preventDefault(); 
             failMessage.classList.add('hidden'); failMessage.classList.remove('flex');
             const gameUI = document.getElementById('game-ui'); 
             gameUI.classList.remove('hidden'); gameUI.classList.add('flex');
             startFishingMinigame();
-        }
+        };
 
+        const doExit = (e) => { 
+            e.preventDefault(); 
+            failMessage.classList.add('hidden'); failMessage.classList.remove('flex');
+            rpgContainer.classList.remove('hidden'); rpgControls.classList.remove('hidden'); instructions.classList.remove('hidden');
+            rpgActive = true; 
+            requestAnimationFrame(rpgLoop);
+        };
+
+        // Attach both click (for PC) and touchstart (for Mobile)
+        btnRetry.addEventListener('mousedown', doRetry);
+        btnRetry.addEventListener('touchstart', doRetry, {passive: false});
+
+        btnExit.addEventListener('mousedown', doExit);
+        btnExit.addEventListener('touchstart', doExit, {passive: false});
+
+        // --- FISHING REEL BUTTON LISTENERS ---
         const handleReelPress = (e) => { e.preventDefault(); isHolding = true; };
         const handleReelRelease = (e) => { e.preventDefault(); isHolding = false; };
         catchBtn.addEventListener('mousedown', handleReelPress); window.addEventListener('mouseup', handleReelRelease);
