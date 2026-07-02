@@ -334,9 +334,10 @@
                         <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-4 text-pastel-dark tracking-wide">Our Co-op Team</h3>
                         <p class="text-slate-500 mb-10 max-w-lg mx-auto text-sm md:text-base">Like May and Cody (but with way less arguing and definitely no Book of Love), we make the ultimate team.</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-1.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
-                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-2.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
-                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="us-3.jpg" alt="Us" class="w-full h-full object-cover"></div></div>
+                            <!-- CO-OP PHOTOS UPDATED HERE -->
+                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="Controller.png" alt="Us - Controller" class="w-full h-full object-cover"></div></div>
+                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="Hair%20Tug.png" alt="Us - Hair Tug" class="w-full h-full object-cover"></div></div>
+                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="Bullying.png" alt="Us - Bullying" class="w-full h-full object-cover"></div></div>
                         </div>
                     </div>
                 </section>
@@ -576,6 +577,7 @@
             if (dialogueIndex < dialogueLines.length) {
                 dialogueText.innerText = dialogueLines[dialogueIndex];
             } else {
+                // DIALOGUE FINISHED: THE GREAT REVEAL
                 dialogueActive = false; hasTalkedToKero = true;
                 dialogueBox.classList.add('hidden'); rpgActive = true; 
                 
@@ -701,7 +703,6 @@
             requestAnimationFrame(rpgLoop);
         };
 
-        // Attach both click (for PC) and touchstart (for Mobile)
         btnRetry.addEventListener('mousedown', doRetry);
         btnRetry.addEventListener('touchstart', doRetry, {passive: false});
 
