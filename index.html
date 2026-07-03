@@ -150,6 +150,12 @@
                         <span class="text-3xl animate-bounce drop-shadow-md">🎣</span>
                     </div>
 
+                    <!-- NEW: THE EXIT 8 SIGN -->
+                    <div id="exit8-sign" class="absolute z-10 w-8 h-8 bg-yellow-400 border-[3px] border-black flex flex-col items-center justify-center shadow-md transform rotate-2 cursor-pointer hover:scale-110 transition-transform" style="left: 51%; top: 22%;">
+                        <span class="font-bold text-black text-sm leading-none mt-1">8</span>
+                        <div class="w-full border-t-[3px] border-black mt-px border-dotted"></div>
+                    </div>
+
                     <!-- THE SOUTHEAST CHEST -->
                     <div id="chest-obj" class="absolute z-10 w-12 h-12 flex items-center justify-center text-4xl drop-shadow-lg transition-transform" style="left: 57%; top: 80%;">
                         🎁
@@ -160,6 +166,10 @@
                     <div class="maze-wall absolute z-20" style="left: 65%; top: -5%; width: 40px; height: 50%;"></div>
                     <div class="maze-wall absolute z-20" style="left: 30%; top: 65%; width: 60%; height: 40px;"></div>
 
+                    <!-- NEW: THE SHEEP DETECTIVES -->
+                    <div id="sheep1-npc" class="absolute z-20 text-3xl md:text-4xl drop-shadow-md transform -scale-x-100" style="left: 5%; top: 45%;">🐑</div>
+                    <div id="sheep2-npc" class="absolute z-20 text-3xl md:text-4xl drop-shadow-md transform -scale-x-100" style="left: 15%; top: 48%;">🐑</div>
+
                     <!-- THE FOG OF WAR -->
                     <div id="fog-overlay" class="absolute inset-0 z-[35] pointer-events-none transition-opacity duration-1500" style="background: rgba(15, 23, 42, 0.98);"></div>
 
@@ -168,9 +178,9 @@
                         <span id="prompt-text" class="animate-pulse">💬 Talk</span>
                     </div>
 
-                    <!-- DIALOGUE BOX UI -->
+                    <!-- DYNAMIC DIALOGUE BOX UI -->
                     <div id="dialogue-box" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-11/12 bg-white/95 border-4 border-blue-400 rounded-xl p-4 shadow-2xl hidden z-[50] cursor-pointer">
-                        <h4 class="font-bold text-blue-600 mb-1 font-heading text-lg">Kero</h4>
+                        <h4 class="font-bold text-blue-600 mb-1 font-heading text-lg" id="dialogue-name">Kero</h4>
                         <p id="dialogue-text" class="text-sm md:text-base text-slate-700 font-semibold"></p>
                         <p class="text-xs text-slate-400 text-right mt-2 animate-pulse font-bold">Tap here to continue ▼</p>
                     </div>
@@ -337,7 +347,7 @@
                     <div class="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 w-full shadow-xl border border-white flex flex-col items-center">
                         <h3 class="font-heading text-2xl md:text-3xl font-semibold text-center mb-8 md:mb-10 text-pastel-dark">A Letter For You</h3>
                         
-                        <!-- ENVELOPE -->
+                        <!-- REVERSIBLE ENVELOPE -->
                         <div id="envelope-container" class="envelope-container relative w-full max-w-md group z-20 no-select">
                             <div class="bg-blue-300 w-full h-48 rounded-t-xl absolute top-0 left-0 z-0"></div>
                             <div class="letter-content absolute top-10 left-0 w-full px-4 z-10 drop-shadow-xl pointer-events-none">
@@ -397,7 +407,7 @@
 
     <!-- Interactive Logic -->
     <script>
-        // --- THE SCROLL INTERSECTION OBSERVER (UPDATED) ---
+        // --- THE SCROLL INTERSECTION OBSERVER ---
         const envContainer = document.getElementById('envelope-container');
         if (envContainer) {
             const envObserver = new IntersectionObserver((entries) => {
@@ -405,7 +415,7 @@
                     if (entry.isIntersecting) {
                         entry.target.classList.add('open');
                     } else {
-                        // NEW: Closes the envelope when she scrolls away!
+                        // Reversible Scroll
                         entry.target.classList.remove('open');
                     }
                 });
@@ -422,6 +432,11 @@
         const keroSprite = document.getElementById('kero-sprite');
         const chestObj = document.getElementById('chest-obj');
         
+        // NEW EASTER EGG ELEMENTS
+        const sheep1Npc = document.getElementById('sheep1-npc');
+        const sheep2Npc = document.getElementById('sheep2-npc');
+        const exit8Sign = document.getElementById('exit8-sign');
+
         const rpgControls = document.getElementById('rpg-controls');
         const actionBtnUI = document.getElementById('rpg-action-btn');
         const mobileActionBtn = document.getElementById('mobile-action-btn');
@@ -434,31 +449,17 @@
         let mazeActive = true; 
         let chestOpened = false;
         
-        // --- DIALOGUE SYSTEM ---
+        // --- NEW UNIFIED DIALOGUE ENGINE ---
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueText = document.getElementById('dialogue-text');
+        const dialogueName = document.getElementById('dialogue-name');
         
         let hasTalkedToKero = false;
-        let dialogueActive = false;
-        let dialogueIndex = 0;
-        const dialogueLines = [
-            "Hey Kayii! You made it through the fog!",
-            "I'm so incredibly proud of you for graduating.",
-            "I left a graduation gift for you in that chest over there.",
-            "You can open it, or we can just go straight to fishing. Your choice!"
-        ];
-
-        let chestDialogueActive = false;
-        let chestDialogueIndex = 0;
-        const chestLines = [
-            "What's this? A vintage box?",
-            "Kero: Oh! You found the hidden gift!",
-            "Kero: It's a One Wish Willow! Since you just graduated, it's tradition. You get one wish for your new journey.",
-            "Kero: Open it up, make your wish, and snap it!"
-        ];
+        let activeDialogue = null; // Object to store current dialogue state
+        let currentAction = "none"; 
+        let rpgActive = true;
 
         // --- MOVEMENT ENGINE ---
-        let rpgActive = true;
         let pX = 10; let pY = 10; 
         const speed = 3.5;
         const keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowleft: false, arrowdown: false, arrowright: false, " ": false };
@@ -466,7 +467,7 @@
         window.addEventListener('keydown', (e) => { 
             const key = e.key.toLowerCase();
             if(rpgActive && keys.hasOwnProperty(key)) keys[key] = true; 
-            if((dialogueActive || chestDialogueActive) && key === " ") triggerAction();
+            if(activeDialogue && key === " ") triggerAction();
         });
         window.addEventListener('keyup', (e) => { 
             const key = e.key.toLowerCase();
@@ -483,22 +484,21 @@
         
         const handleActionPress = (e) => { 
             e.preventDefault(); 
-            if(rpgActive || dialogueActive || chestDialogueActive) triggerAction(); 
+            if(rpgActive || activeDialogue) triggerAction(); 
         };
         mobileActionBtn.addEventListener('mousedown', handleActionPress);
         mobileActionBtn.addEventListener('touchstart', handleActionPress, {passive: false});
         
-        dialogueBox.addEventListener('touchstart', (e) => { e.preventDefault(); if(dialogueActive || chestDialogueActive) triggerAction(); });
-        dialogueBox.addEventListener('mousedown', (e) => { e.preventDefault(); if(dialogueActive || chestDialogueActive) triggerAction(); });
+        dialogueBox.addEventListener('touchstart', (e) => { e.preventDefault(); if(activeDialogue) triggerAction(); });
+        dialogueBox.addEventListener('mousedown', (e) => { e.preventDefault(); if(activeDialogue) triggerAction(); });
 
         let frameCount = 0; let animIndex = 0; let currentFacing = 0; 
         let kX = -1; let kY = -1; 
         let kFrameCount = 0; let kAnimIndex = 0; let kFacing = 0; let kScale = 1;
         let pXInit = false; 
-        let currentAction = "none"; 
 
         function rpgLoop() {
-            if (!rpgActive && !dialogueActive && !chestDialogueActive) return;
+            if (!rpgActive && !activeDialogue) return;
 
             if (kX === -1) { kX = keroNpc.offsetLeft; kY = keroNpc.offsetTop; }
             if (!pXInit) { pX = rpgPlayer.offsetLeft; pY = rpgPlayer.offsetTop; pXInit = true; }
@@ -568,16 +568,27 @@
                     let kXPos = kAnimIndex * 33.333; keroSprite.style.backgroundPosition = `${kXPos}% ${kFacing}%`; keroSprite.style.transform = `scaleX(${kScale})`;
                 }
 
-                // UI CONTEXT CHECKS
+                // --- UI CONTEXT & COLLISION CHECKS ---
                 const isNearKero = (pX < kX + pW + 20 && pX + pW > kX - 20 && pY < kY + pH + 20 && pY + pH > kY - 20);
                 const beach = document.getElementById('beach-patch');
                 const isNearBeach = (pX + pW > beach.offsetLeft && pX < beach.offsetLeft + beach.clientWidth && pY + pH > beach.offsetTop && pY < beach.offsetTop + beach.clientHeight);
                 const isNearChest = !chestOpened && (pX + pW > chestObj.offsetLeft - 20 && pX < chestObj.offsetLeft + chestObj.clientWidth + 20 && pY + pH > chestObj.offsetTop - 20 && pY < chestObj.offsetTop + chestObj.clientHeight + 20);
+                
+                const isNearExit8 = (pX + pW > exit8Sign.offsetLeft - 20 && pX < exit8Sign.offsetLeft + exit8Sign.clientWidth + 20 && pY + pH > exit8Sign.offsetTop - 20 && pY < exit8Sign.offsetTop + exit8Sign.clientHeight + 20);
+                const isNearSheep1 = (pX + pW > sheep1Npc.offsetLeft - 20 && pX < sheep1Npc.offsetLeft + sheep1Npc.clientWidth + 20 && pY + pH > sheep1Npc.offsetTop - 20 && pY < sheep1Npc.offsetTop + sheep1Npc.clientHeight + 20);
+                const isNearSheep2 = (pX + pW > sheep2Npc.offsetLeft - 20 && pX < sheep2Npc.offsetLeft + sheep2Npc.clientWidth + 20 && pY + pH > sheep2Npc.offsetTop - 20 && pY < sheep2Npc.offsetTop + sheep2Npc.clientHeight + 20);
+
 
                 if (isNearKero && !hasTalkedToKero) {
                     currentAction = "talk"; promptText.innerText = "💬 Talk to Kero"; enableActionBtn("💬 Talk");
                 } else if (isNearChest && hasTalkedToKero) {
                     currentAction = "chest"; promptText.innerText = "🎁 Open Gift"; enableActionBtn("🎁 Open");
+                } else if (isNearExit8) {
+                    currentAction = "exit8"; promptText.innerText = "🔍 Inspect Sign"; enableActionBtn("🔍 Inspect");
+                } else if (isNearSheep1) {
+                    currentAction = "sheep1"; promptText.innerText = "💬 Talk to Sheep"; enableActionBtn("💬 Talk");
+                } else if (isNearSheep2) {
+                    currentAction = "sheep2"; promptText.innerText = "💬 Talk to Sheep"; enableActionBtn("💬 Talk");
                 } else if (isNearBeach && hasTalkedToKero) {
                     currentAction = "fish"; promptText.innerText = "🎣 Cast Line"; enableActionBtn("🎣 Cast Line");
                 } else {
@@ -601,60 +612,92 @@
 
         rpgLoop();
 
+        // --- NEW DIALOGUE LOGIC ENGINE ---
+        function startDialogue(name, linesArray, onCompleteCallback) {
+            rpgActive = false;
+            actionPrompt.classList.add('opacity-0');
+            instructions.innerText = "Tap/Space to continue...";
+            dialogueBox.classList.remove('hidden');
+            
+            activeDialogue = {
+                name: name,
+                lines: linesArray,
+                index: 0,
+                onComplete: onCompleteCallback
+            };
+            
+            dialogueName.innerText = activeDialogue.name;
+            dialogueText.innerText = activeDialogue.lines[activeDialogue.index];
+        }
+
+        function advanceGenericDialogue() {
+            activeDialogue.index++;
+            if (activeDialogue.index < activeDialogue.lines.length) {
+                dialogueText.innerText = activeDialogue.lines[activeDialogue.index];
+            } else {
+                // End dialogue
+                dialogueBox.classList.add('hidden');
+                rpgActive = true;
+                if (activeDialogue.onComplete) activeDialogue.onComplete();
+                activeDialogue = null;
+            }
+        }
+
         function triggerAction() {
-            if (dialogueActive) { advanceDialogue(); return; }
-            if (chestDialogueActive) { advanceChestDialogue(); return; }
+            if (activeDialogue) { advanceGenericDialogue(); return; }
             if (currentAction === "none") return;
 
             if (currentAction === "talk") {
-                rpgActive = false; dialogueActive = true; dialogueIndex = 0;
-                actionPrompt.classList.add('opacity-0');
-                instructions.innerText = "Tap/Space to continue...";
-                dialogueBox.classList.remove('hidden');
-                dialogueText.innerText = dialogueLines[dialogueIndex];
+                const lines = [
+                    "Hey Kayii! You made it through the fog!",
+                    "I'm so incredibly proud of you for graduating.",
+                    "I left a graduation gift for you in that chest over there.",
+                    "You can open it, or we can just go straight to fishing. Your choice!"
+                ];
+                startDialogue("Kero", lines, () => {
+                    hasTalkedToKero = true;
+                    document.getElementById('main-body').classList.remove('bw-theme'); 
+                    mazeActive = false; 
+                    if (fogOverlay) fogOverlay.style.opacity = '0'; 
+                    document.querySelectorAll('.maze-wall').forEach(w => w.style.opacity = '0');
+                    instructions.innerText = "Open the chest, or head to the beach to fish!";
+                });
+
             } else if (currentAction === "chest") {
-                rpgActive = false; chestDialogueActive = true; chestDialogueIndex = 0;
-                actionPrompt.classList.add('opacity-0');
-                instructions.innerText = "Tap/Space to continue...";
-                dialogueBox.classList.remove('hidden');
-                dialogueText.innerText = chestLines[chestDialogueIndex];
+                const lines = [
+                    "What's this? A vintage box?",
+                    "Kero: Oh! You found the hidden gift!",
+                    "Kero: It's a One Wish Willow! Since you just graduated, it's tradition. You get one wish for your new journey.",
+                    "Kero: Open it up, make your wish, and snap it!"
+                ];
+                startDialogue("Kero", lines, () => {
+                    const modal = document.getElementById('willow-modal');
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                });
+
+            } else if (currentAction === "exit8") {
+                startDialogue("Signpost", ["There are no visible anomalies. You may proceed to fish."], () => {
+                    instructions.innerText = "No anomalies found. Safe to fish!";
+                });
+
+            } else if (currentAction === "sheep1") {
+                const lines = hasTalkedToKero ? 
+                    ["Meeeeh... Case closed! You found Kero. Excellent detective work, Kayii!"] : 
+                    ["Meeeeh... Detective’s Log. The fog is thick today. Our primary suspect, 'Kero', is hiding somewhere in here."];
+                startDialogue("Sheep Detective", lines);
+
+            } else if (currentAction === "sheep2") {
+                const lines = hasTalkedToKero ? 
+                    ["Meeeeh... Congratulations! Our investigation here is done. You can now proceed to the beach for some fishing."] : 
+                    ["Meeeeh... Use your WASD keys to investigate. Leave no pixel unturned!"];
+                startDialogue("Sheep Detective", lines);
+
             } else if (currentAction === "fish") {
                 rpgActive = false;
                 rpgContainer.classList.add('hidden'); rpgControls.classList.add('hidden'); instructions.classList.add('hidden');
                 const gameUI = document.getElementById('game-ui'); gameUI.classList.remove('hidden'); gameUI.classList.add('flex');
                 startFishingMinigame();
-            }
-        }
-
-        function advanceDialogue() {
-            dialogueIndex++;
-            if (dialogueIndex < dialogueLines.length) {
-                dialogueText.innerText = dialogueLines[dialogueIndex];
-            } else {
-                dialogueActive = false; hasTalkedToKero = true;
-                dialogueBox.classList.add('hidden'); rpgActive = true; 
-                
-                document.getElementById('main-body').classList.remove('bw-theme'); 
-                mazeActive = false; 
-                if (fogOverlay) { fogOverlay.style.opacity = '0'; }
-                document.querySelectorAll('.maze-wall').forEach(wall => {
-                    wall.style.opacity = '0';
-                });
-
-                instructions.innerText = "Open the chest, or head to the beach to fish!";
-            }
-        }
-
-        function advanceChestDialogue() {
-            chestDialogueIndex++;
-            if (chestDialogueIndex < chestLines.length) {
-                dialogueText.innerText = chestLines[chestDialogueIndex];
-            } else {
-                chestDialogueActive = false;
-                dialogueBox.classList.add('hidden');
-                const modal = document.getElementById('willow-modal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
             }
         }
 
