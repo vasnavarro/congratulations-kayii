@@ -166,7 +166,7 @@
                     <div class="maze-wall absolute z-20" style="left: 65%; top: -5%; width: 40px; height: 50%;"></div>
                     <div class="maze-wall absolute z-20" style="left: 30%; top: 65%; width: 60%; height: 40px;"></div>
 
-                    <!-- NEW: THE SHEEP DETECTIVES (Lily & Mopple) -->
+                    <!-- THE SHEEP DETECTIVES (Lily & Mopple) -->
                     <div id="sheep-npc" class="absolute z-20 flex gap-1 items-end" style="left: 10%; top: 12%;">
                         <span class="text-3xl md:text-4xl drop-shadow-md transform -scale-x-100">🐑</span>
                         <span class="text-3xl md:text-4xl drop-shadow-md transform -scale-x-100 mb-2">🐑</span>
@@ -672,6 +672,11 @@
                     "Kero: Open it up, make your wish, and snap it!"
                 ];
                 startDialogue("Kero", lines, () => {
+                    // BUG FIX: Keep RPG disabled while Willow is open!
+                    rpgActive = false;
+                    disableActionBtn();
+                    currentAction = "none";
+                    
                     const modal = document.getElementById('willow-modal');
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
