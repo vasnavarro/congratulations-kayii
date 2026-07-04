@@ -150,7 +150,7 @@
                         <span class="text-3xl animate-bounce drop-shadow-md">🎣</span>
                     </div>
 
-                    <!-- NEW: THE INVISIBLE EXIT 8 LANDSCAPE SIGN -->
+                    <!-- THE INVISIBLE EXIT 8 LANDSCAPE SIGN -->
                     <img id="exit8-sign" src="exit8.png" alt="Exit 8 Sign" class="absolute z-10 w-16 md:w-20 shadow-md transform rotate-2 cursor-pointer hover:scale-110 transition-all duration-1000 opacity-0 pointer-events-none rounded-sm" style="left: 51%; top: 22%;">
 
                     <!-- THE SOUTHEAST CHEST -->
@@ -187,11 +187,12 @@
                     <!-- WILLOW IN-GAME MODAL -->
                     <div id="willow-modal" class="absolute inset-0 z-[60] bg-slate-900/90 backdrop-blur-md hidden flex-col items-center justify-center p-4 transition-colors duration-300">
                         
-                        <!-- Box Graphic -->
-                        <div id="willow-box-modal" class="relative cursor-pointer transform transition duration-300 hover:scale-105 group w-full flex justify-center" onclick="openWillowModal()">
+                        <!-- Box Graphic (UPDATED: Fixed mobile touch interference!) -->
+                        <div id="willow-box-modal" class="relative cursor-pointer transform transition duration-300 md:hover:scale-105 group w-full flex justify-center" onclick="openWillowModal(event)" ontouchend="openWillowModal(event)">
                             <img src="onewishwillow.png" alt="One Wish Willow" class="w-full max-w-[280px] md:max-w-sm rounded-xl shadow-2xl">
-                            <div class="absolute inset-0 max-w-[280px] md:max-w-sm mx-auto bg-black/0 group-hover:bg-black/20 transition-colors rounded-xl flex items-center justify-center">
-                                <span class="bg-pastel-dark text-white font-bold py-2 px-6 rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-opacity">Tap to Open</span>
+                            <!-- MOBILE FIRST: The label is permanently visible on mobile, so it doesn't eat the first tap -->
+                            <div class="absolute inset-0 max-w-[280px] md:max-w-sm mx-auto bg-black/20 md:bg-black/0 md:group-hover:bg-black/20 transition-colors rounded-xl flex items-center justify-center">
+                                <span class="bg-pastel-dark text-white font-bold py-2 px-6 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">Tap to Open</span>
                             </div>
                         </div>
 
@@ -200,15 +201,15 @@
                             <p class="text-white font-bold mb-2 animate-pulse text-lg drop-shadow-md">Close your eyes.</p>
                             <p class="text-pastel-blue font-extrabold mb-10 text-lg md:text-xl tracking-wide drop-shadow-md text-center max-w-xs">Make a graduation wish, then tap to snap the willow.</p>
                             
-                            <div id="the-stick-wrapper" class="relative w-full max-w-[250px] h-12 md:h-16 flex cursor-pointer group" onclick="breakWillowModal()">
+                            <div id="the-stick-wrapper" class="relative w-full max-w-[250px] h-12 md:h-16 flex cursor-pointer group" onclick="breakWillowModal(event)" ontouchend="breakWillowModal(event)">
                                 <!-- Left Half -->
-                                <div id="stick-left" class="w-1/2 h-full bg-gradient-to-r from-slate-700 to-slate-600 rounded-l-full relative shadow-[inset_0_-4px_10px_rgba(0,0,0,0.5)] willow-left-half group-hover:brightness-125 transition-all" style="transform-origin: bottom right; transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                                <div id="stick-left" class="w-1/2 h-full bg-gradient-to-r from-slate-700 to-slate-600 rounded-l-full relative shadow-[inset_0_-4px_10px_rgba(0,0,0,0.5)] willow-left-half md:group-hover:brightness-125 transition-all" style="transform-origin: bottom right; transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
                                     <div class="absolute w-4 h-3 bg-black rounded-full top-2 left-4 opacity-40"></div>
                                     <div class="absolute w-6 h-4 bg-black rounded-full bottom-2 left-12 opacity-40"></div>
                                     <div class="absolute w-5 h-3 bg-black rounded-full top-4 right-4 opacity-40"></div>
                                 </div>
                                 <!-- Right Half -->
-                                <div id="stick-right" class="w-1/2 h-full bg-gradient-to-l from-slate-700 to-slate-600 rounded-r-full relative shadow-[inset_0_-4px_10px_rgba(0,0,0,0.5)] willow-right-half -ml-[2px] group-hover:brightness-125 transition-all" style="transform-origin: bottom left; transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+                                <div id="stick-right" class="w-1/2 h-full bg-gradient-to-l from-slate-700 to-slate-600 rounded-r-full relative shadow-[inset_0_-4px_10px_rgba(0,0,0,0.5)] willow-right-half -ml-[2px] md:group-hover:brightness-125 transition-all" style="transform-origin: bottom left; transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);">
                                     <div class="absolute w-5 h-3 bg-black rounded-full top-3 left-4 opacity-40"></div>
                                     <div class="absolute w-8 h-4 bg-black rounded-full bottom-2 right-10 opacity-40"></div>
                                     <div class="absolute w-4 h-3 bg-black rounded-full top-2 right-4 opacity-40"></div>
@@ -217,7 +218,7 @@
                             
                             <p id="willow-result" class="text-yellow-300 font-heading font-extrabold text-3xl md:text-4xl mt-12 tracking-wide opacity-0 translate-y-4 transition-all duration-1000 drop-shadow-[0_0_10px_rgba(253,224,71,0.8)]">✨ WISH GRANTED ✨</p>
                             
-                            <button id="close-willow-btn" class="mt-8 px-8 py-3 bg-white text-slate-800 rounded-full font-bold shadow-lg opacity-0 transition-opacity duration-1000 hidden cursor-pointer hover:bg-slate-100" onclick="closeWillowModal()">Back to Map</button>
+                            <button id="close-willow-btn" class="mt-8 px-8 py-3 bg-white text-slate-800 rounded-full font-bold shadow-lg opacity-0 transition-opacity duration-1000 hidden cursor-pointer md:hover:bg-slate-100" onclick="closeWillowModal(event)" ontouchend="closeWillowModal(event)">Back to Map</button>
                         </div>
                     </div>
 
@@ -677,6 +678,18 @@
                     disableActionBtn();
                     currentAction = "none";
                     
+                    let willowOpened = false;
+                    window.openWillowModal = function(e) {
+                        if (e) e.preventDefault();
+                        if (willowOpened) return;
+                        willowOpened = true;
+                        
+                        document.getElementById('willow-box-modal').classList.add('hidden');
+                        const stickArea = document.getElementById('willow-stick-modal');
+                        stickArea.classList.remove('hidden');
+                        stickArea.classList.add('flex');
+                    };
+
                     const modal = document.getElementById('willow-modal');
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
@@ -713,14 +726,20 @@
         actionBtnUI.addEventListener('click', triggerAction);
 
         // --- IN-GAME ONE WISH WILLOW LOGIC ---
-        window.openWillowModal = function() {
+        let willowOpened = false;
+        window.openWillowModal = function(e) {
+            if (e) e.preventDefault();
+            if (willowOpened) return;
+            willowOpened = true;
+            
             document.getElementById('willow-box-modal').classList.add('hidden');
             const stickArea = document.getElementById('willow-stick-modal');
             stickArea.classList.remove('hidden');
             stickArea.classList.add('flex');
         };
 
-        window.breakWillowModal = function() {
+        window.breakWillowModal = function(e) {
+            if (e) e.preventDefault();
             if(window.willowBroken) return;
             window.willowBroken = true;
             
@@ -747,7 +766,8 @@
             }, 600);
         };
 
-        window.closeWillowModal = function() {
+        window.closeWillowModal = function(e) {
+            if (e) e.preventDefault();
             const modal = document.getElementById('willow-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
