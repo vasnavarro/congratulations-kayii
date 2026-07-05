@@ -190,7 +190,6 @@
                         <!-- Box Graphic -->
                         <div id="willow-box-modal" class="relative cursor-pointer transform transition duration-300 md:hover:scale-105 group w-full flex justify-center" onclick="openWillowModal(event)" ontouchend="openWillowModal(event)">
                             <img src="onewishwillow.png" alt="One Wish Willow" class="w-full max-w-[280px] md:max-w-sm rounded-xl shadow-2xl">
-                            <!-- MOBILE FIRST: The label is permanently visible on mobile, so it doesn't eat the first tap -->
                             <div class="absolute inset-0 max-w-[280px] md:max-w-sm mx-auto bg-black/20 md:bg-black/0 md:group-hover:bg-black/20 transition-colors rounded-xl flex items-center justify-center">
                                 <span class="bg-pastel-dark text-white font-bold py-2 px-6 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">Tap to Open</span>
                             </div>
@@ -370,33 +369,6 @@
                         </div>
                         <div class="h-96 hidden md:block"></div>
                         <div class="h-[30rem] block md:hidden"></div>
-                    </div>
-                </section>
-
-                <section id="coop-section" class="py-16 px-4 md:px-6 max-w-5xl mx-auto text-center relative z-10 w-full">
-                    <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border border-white">
-                        <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-4 text-pastel-dark tracking-wide">Our Co-op Team</h3>
-                        <p class="text-slate-500 mb-10 max-w-lg mx-auto text-sm md:text-base">Like May and Cody (but with way less arguing and definitely no Book of Love), we make the ultimate team.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="Controller.png" alt="Us - Controller" class="w-full h-full object-cover"></div></div>
-                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="Hair%20Tug.png" alt="Us - Hair Tug" class="w-full h-full object-cover"></div></div>
-                            <div class="bg-white rounded-3xl shadow-lg border-2 border-white overflow-hidden transform transition hover:-translate-y-2"><div class="w-full aspect-square bg-slate-200 relative"><img src="Bullying.png" alt="Us - Bullying" class="w-full h-full object-cover"></div></div>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="memories-section" class="py-16 px-4 md:px-6 max-w-5xl mx-auto text-center my-8 w-full">
-                    <div class="bg-white/80 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-xl border border-white">
-                        <h3 class="font-heading text-2xl md:text-3xl font-semibold mb-2 text-pastel-dark">Our Memories</h3>
-                        <p class="text-slate-500 mb-8 text-sm md:text-base">From epic boss fights to our favorite gaming and movie nights.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="aspect-video bg-black rounded-xl overflow-hidden shadow-md relative group flex items-center justify-center border-2 border-white transform-gpu will-change-transform z-50">
-                                <video src="boss-fight.mp4#t=0.001" playsinline preload="none" controls class="w-full h-full object-contain relative z-50 transform-gpu" poster="https://via.placeholder.com/640x360/1e293b/ffffff?text=Tap+to+Play!"></video>
-                            </div>
-                            <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="stardew-fishing.png" alt="Stardew Valley" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
-                            <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
-                            <div class="aspect-video bg-slate-200 rounded-xl overflow-hidden shadow-md relative group border-2 border-white"><img src="https://via.placeholder.com/640x360?text=Upload+Memory" alt="Memory" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"></div>
-                        </div>
                     </div>
                 </section>
 
@@ -696,9 +668,12 @@
                 });
 
             } else if (currentAction === "exit8") {
+                // BUG FIX: Corrected text to exactly match your requested anomaly line
                 if (!chestOpened) {
                     startDialogue("Exit 8 Sign", [
-                        "WARNING: Proceeding to the beach before opening your gift will trigger an anomaly."
+                        "ANOMALY DETECTED.",
+                        "An unopened gift remains in the area.",
+                        "Turn back immediately."
                     ], () => {});
                 } else {
                     startDialogue("Exit 8 Sign", ["There are no visible anomalies. You may proceed to fish."], () => {
